@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Brief AI | Your AI-Powered Daily Planning Assistant</title>
+    <meta name="description" content="Generate a personalized daily brief with AI-powered prioritization, scheduling, and motivation.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="ambient ambient-1" aria-hidden="true"></div>
+    <div class="ambient ambient-2" aria-hidden="true"></div>
+
+    <header class="top-bar">
+        <div class="brand">
+            <span class="logo" aria-hidden="true">✦</span>
+            <h1>Daily Brief <span>AI</span></h1>
+        </div>
+        <div class="top-actions">
+            <button id="themeToggle" class="icon-btn" title="Toggle theme (T)" aria-label="Toggle light or dark theme">
+                <span class="theme-icon light">☀️</span>
+                <span class="theme-icon dark">🌙</span>
+            </button>
+            <button id="clearBtn" class="icon-btn" title="Clear form (C)" aria-label="Clear form">
+                🗑️
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <h2>Plan your best day, every day</h2>
+            <p>Tell us about your goals, tasks, meetings, and worries. Our AI will craft a complete daily brief with priorities, schedule, and motivation.</p>
+        </section>
+
+        <div class="app-grid">
+            <section class="card input-card">
+                <div class="card-header">
+                    <h3>📋 Your Day</h3>
+                    <span class="hint">All fields support Markdown-style line breaks</span>
+                </div>
+
+                <form id="briefForm" novalidate>
+                    <div class="form-group">
+                        <label for="goals">Today's Goals <span class="required">*</span></label>
+                        <textarea id="goals" name="goals" rows="3" placeholder="e.g. Ship the landing page update, call the client, exercise" maxlength="1000" required></textarea>
+                        <span class="counter" data-for="goals">0 / 1000</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="todos">To-Do List <span class="required">*</span></label>
+                        <textarea id="todos" name="todos" rows="4" placeholder="- Draft email&#10;- Review pull requests&#10;- Update roadmap" maxlength="1500" required></textarea>
+                        <span class="counter" data-for="todos">0 / 1500</span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="meetings">Meetings</label>
+                            <textarea id="meetings" name="meetings" rows="3" placeholder="10:00 Standup&#10;14:00 Design review" maxlength="800"></textarea>
+                            <span class="counter" data-for="meetings">0 / 800</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="deadlines">Deadlines</label>
+                            <textarea id="deadlines" name="deadlines" rows="3" placeholder="Q3 report due Friday&#10;Invoice client by EOD" maxlength="800"></textarea>
+                            <span class="counter" data-for="deadlines">0 / 800</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" name="notes" rows="3" placeholder="Any context, ideas, or reminders..." maxlength="1200"></textarea>
+                        <span class="counter" data-for="notes">0 / 1200</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="worries">Things Worrying You</label>
+                        <textarea id="worries" name="worries" rows="3" placeholder="e.g. Not enough time, unclear requirements, energy level" maxlength="1000"></textarea>
+                        <span class="counter" data-for="worries">0 / 1000</span>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary" id="generateBtn">
+                            <span class="btn-text">✨ Generate Daily Brief</span>
+                            <span class="spinner" aria-hidden="true"></span>
+                        </button>
+                        <button type="button" class="btn-secondary" id="loadHistoryBtn">📜 History</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="card output-card" id="outputSection">
+                <div class="output-placeholder" id="outputPlaceholder">
+                    <div class="illustration" aria-hidden="true">📝</div>
+                    <h3>Your AI brief will appear here</h3>
+                    <p>Fill out the form and click <strong>Generate Daily Brief</strong> to get started.</p>
+                </div>
+
+                <div class="output-content hidden" id="outputContent">
+                    <div class="output-header">
+                        <h3>🚀 Your Daily Brief</h3>
+                        <div class="output-actions">
+                            <button id="copyBtn" class="btn-ghost" title="Copy to clipboard">📋 Copy</button>
+                            <button id="downloadBtn" class="btn-ghost" title="Download as Markdown">⬇️ Download</button>
+                        </div>
+                    </div>
+                    <div class="markdown-body" id="briefOutput"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>Built with Flask, Google Gemini, and caffeine. 🚀</p>
+    </footer>
+
+    <!-- Toast notifications -->
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- History modal -->
+    <div id="historyModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="historyTitle">📜 Brief History</h3>
+                <button class="modal-close" aria-label="Close history">×</button>
+            </div>
+            <div class="modal-body" id="historyList">
+                <p class="empty-state">No saved briefs yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
